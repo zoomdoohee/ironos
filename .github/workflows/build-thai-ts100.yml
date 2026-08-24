@@ -29,9 +29,6 @@ jobs:
       - name: Enable Thai glyph tables
         run: python3 Translations/enable_thai_font.py
 
-      - name: Validate Thai translation generation
-        run: make -C source model=TS100 Translation.cpp lang=TH
-
       - name: Build TS100 Thai firmware
         run: make -C source -j2 model=TS100 firmware-TH
 
