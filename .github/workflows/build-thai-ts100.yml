@@ -1,0 +1,46 @@
+name: Build Thai TS100
+
+on:
+  push:
+    branches:
+      - thai-ts100
+  pull_request:
+    branches:
+      - dev
+  workflow_dispatch:
+
+jobs:
+  build-thai-ts100:
+    runs-on: ubuntu-24.04
+    container:
+      image: alpine:3.21
+
+    steps:
+      - name: Install build dependencies
+        run: apk add --no-cache gcc-arm-none-eabi g++-arm-none-eabi newlib-arm-none-eabi findutils python3 py3-pip make git bash
+
+      - name: Install Python dependencies
+        run: python3 -m pip install --break-system-packages bdflib pyyaml
+
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - name: Enable Thai glyph tables
+        run: python3 Translations/enable_thai_font.py
+
+      - name: Build TS100 Thai firmware
+        run: make -C source -j2 model=TS100 firmware-TH
+
+      - name: List generated files
+        run: ls -lh source/Hexfile/TS100_TH.*
+
+      - name: Upload TS100 Thai firmware
+        uses: actions/upload-artifact@v7
+        with:
+          name: TS100-Thai
+          path: |
+            source/Hexfile/TS100_TH.hex
+            source/Hexfile/TS100_TH.bin
+            source/Hexfile/TS100_TH.elf
+          if-no-files-found: error
